@@ -249,13 +249,27 @@ int main(void)
 	// valueInBase10 = (12.4V * 65535) / 16.92 = 48028.014184397163121
 	// valueInBase16 = 0xBB9C
 	//TODO
-	//rc = modbus_write_register(ctx, 0xE004, 0xBB9C);
+	/*
+	rc = modbus_write_register(ctx, 0xE004, 48028);
+	if(rc == 1) {
+		printf("Successfully updated Low Voltage Disconnect");
+	} else {
+		printf("Update of Low Voltage Disconnect Failed");
+	}
+	*/
 
         // Low Voltage Reconnected - LVR
-        // valueInBase10 = (12.8V * 65535) / 16.92 = 49577.304964539007092
-        // valueInBase16 = 0xC1A9 
+        // valueInBase10 = (12.7V * 65535) / 16.92 = 49189.982269503546099
+        // valueInBase16 = 0xC025
         //TODO
-	//rc = modbus_write_register(ctx, 0xE005, 0xC1A9);	
+	/*
+	rc = modbus_write_register(ctx, 0xE005, 49189);	
+	if(rc == 1) {
+		printf("Successfully updated Low Voltage Reconnect");
+	} else {
+		printf("Update of Low Voltage Reconnect Failed");
+	}
+	*/
 
 	/* Close the MODBUS connection */
 	modbus_close(ctx);
