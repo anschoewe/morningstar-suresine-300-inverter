@@ -2,7 +2,10 @@
  *  suresine.c - This program reads all the RAM and EEPROM registers on a Moringstar SureSine-300 and prints the results.
  *  
 
+This software was derived from work done by Tom Rinehart.  Thank you.
+
 Copyright 2012 Tom Rinehart.
+Updated 2018 by Andrew Schoewe.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
