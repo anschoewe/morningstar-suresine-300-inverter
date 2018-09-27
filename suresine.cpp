@@ -22,18 +22,97 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-/* Compile with: cc `pkg-config --cflags --libs libmodbus` suresine.c -o suresine */
+/* Compile with: g++ `pkg-config --cflags --libs libmodbus` suresine.cpp -o suresine */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <modbus.h>
+#include <unistd.h>
+#include <iostream>
+using namespace std;
 
 #define SURESINE    0x01        /* MODBUS Address of the SureSine-300 */
 
+modbus_t* connect(string *devicePath);
+int disconnect(modbus_t *ctx);
+void read(modbus_t *ctx);
+void write(modbus_t *ctx);
+int writeRegister(modbus_t *ctx, int addr, float rawInput);
+
 int main(void)
 {
-	modbus_t *ctx;
+	modbus_t *ctx = NULL;
+	short Ths, menuChoice;
+	string devicePath = "/dev/tty.usbserial-DO001BL8";
+
+	cout << "Morningstar SureSine 300 Inverter Settings" << endl << endl;
+
+	cout << "Choose mode..." << endl;
+	cout << "1. Read" << endl;
+	cout << "2. Write" << endl;
+	cout << "Mode: ";
+
+	cin >> menuChoice;
+	cout << endl;
+	
+	/* Set up a new MODBUS context */
+	/* Make sure to set the appropriate path for your computer and device */
+	ctx = connect(&devicePath);
+	if (ctx == NULL) {
+		return -1;
+	}
+	
+	if(menuChoice == 1) {
+		read(ctx);
+	} else if(menuChoice == 2) {
+		write(ctx);
+	} else {
+		printf("Invalid choice.");
+		return -1;
+	}
+
+	return 0;
+
+	/* Close the MODBUS connection */
+	return disconnect(ctx);
+}
+
+modbus_t* connect(string *devicePath) {
+
+	modbus_t *ctx = NULL;
+
+	/* Set up a new MODBUS context */
+	/* Make sure to set the appropriate path for your computer and device */
+	cout << "Attempting to connect to " << *devicePath << endl << endl;
+	ctx = modbus_new_rtu((*devicePath).c_str(), 9600, 'N', 8, 2);
+	if (ctx == NULL) {
+		fprintf(stderr, "Unable to create the libmodbus context\n");
+		return ctx;
+	}
+	
+	/* Set the slave id to the SureSine-300 MODBUS id */
+	modbus_set_slave(ctx, SURESINE);
+	
+	/* Open the MODBUS connection to the SureSine-300 */
+	if (modbus_connect(ctx) == -1) {
+        	fprintf(stderr, "Connection failed: %s\n", modbus_strerror(errno));
+        	modbus_free(ctx);
+        	return NULL;
+	}
+
+	return ctx;
+}
+
+int disconnect(modbus_t *ctx) {
+	modbus_close(ctx);
+	modbus_free(ctx);
+	
+	return(0);
+
+}
+
+void read(modbus_t *ctx) {
 	int rc;
 	float adc_vb, adc_iac, adc_ths, adc_remon, Vb, Iac, mod_index;
 	short Ths;
@@ -43,25 +122,7 @@ int main(void)
 	unsigned short Emodbus_id, Emeter_id, Ehourmeter;
 	char Eserial_no[9];
 	uint16_t data[20];
-	
-	/* Set up a new MODBUS context */
-	/* Make sure to set the appropriate path for your computer and device */
-	ctx = modbus_new_rtu("/dev/tty.usbserial-DO001BL8", 9600, 'N', 8, 2);
-	if (ctx == NULL) {
-		fprintf(stderr, "Unable to create the libmodbus context\n");
-		return -1;
-	}
-	
-	/* Set the slave id to the SureSine-300 MODBUS id */
-	modbus_set_slave(ctx, SURESINE);
-	
-	/* Open the MODBUS connection to the SureSine-300 */
-    if (modbus_connect(ctx) == -1) {
-        fprintf(stderr, "Connection failed: %s\n", modbus_strerror(errno));
-        modbus_free(ctx);
-        return -1;
-    }
-	
+
 	/* Read the RAM Registers and convert the results to their proper values */
 	rc = modbus_read_registers(ctx, 0x0000, 17, data);
 	
@@ -241,43 +302,50 @@ int main(void)
 	Eserial_no[7]=data[7] >> 8;
 	Eserial_no[8]='\0';
 	printf("Eserial_no = %s\n",Eserial_no);
+}
+
+void write(modbus_t *ctx) {
+
+	int rc;
+	float rawInput;
 
 	/***************
 	*
-	* Write LDV and LVR registers (ARS)
+	* Write LDV and LVR registers
 	*
 	****************/
 	
 	// Low Voltage Disconnect - LVD
 	// valueInBase10 = (12.4V * 65535) / 16.92 = 48028.014184397163121
 	// valueInBase16 = 0xBB9C
-	//TODO
-	/*
-	rc = modbus_write_register(ctx, 0xE004, 48028);
+	cout << "Low voltage disconnect value (volts): ";
+	cin >> rawInput;
+	cout << endl;
+	rc = writeRegister(ctx, 0xE004, rawInput);
 	if(rc == 1) {
 		printf("Successfully updated Low Voltage Disconnect");
 	} else {
 		printf("Update of Low Voltage Disconnect Failed");
 	}
-	*/
 
-        // Low Voltage Reconnected - LVR
-        // valueInBase10 = (12.7V * 65535) / 16.92 = 49189.982269503546099
-        // valueInBase16 = 0xC025
-        //TODO
-	/*
-	rc = modbus_write_register(ctx, 0xE005, 49189);	
+    // Low Voltage Reconnected - LVR
+    // valueInBase10 = (12.7V * 65535) / 16.92 = 49189.982269503546099
+    // valueInBase16 = 0xC025
+	cout << "Low voltage reconnect value (volts): ";
+	cin >> rawInput;
+	cout << endl;
+	rc = writeRegister(ctx, 0xE005, rawInput);
 	if(rc == 1) {
 		printf("Successfully updated Low Voltage Reconnect");
 	} else {
 		printf("Update of Low Voltage Reconnect Failed");
 	}
-	*/
+}
 
-	/* Close the MODBUS connection */
-	modbus_close(ctx);
-	modbus_free(ctx);
-	
-	return(0);
+int writeRegister(modbus_t *ctx, int addr, float rawInput) {
+	float floatInputVal =(rawInput * 65535) / 16.92;
+	int intInputVal = (int)floatInputVal;
+	//cout << intInputVal << endl;
+	return modbus_write_register(ctx, addr, intInputVal);
 }
 
