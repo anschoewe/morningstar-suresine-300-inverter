@@ -55,6 +55,8 @@ int main(void)
 
 	cin >> menuChoice;
 	cout << endl;
+
+	//sleep(5);
 	
 	/* Set up a new MODBUS context */
 	/* Make sure to set the appropriate path for your computer and device */
