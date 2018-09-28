@@ -1,5 +1,5 @@
 /*
- *  suresine.c - This program reads all the RAM and EEPROM registers on a Moringstar SureSine-300 and prints the results.
+ *  suresine.cpp - This program reads all the RAM and EEPROM registers on a Moringstar SureSine-300 and prints the results.
  *  
 
 This software was derived from work done by Tom Rinehart.  Thank you.
