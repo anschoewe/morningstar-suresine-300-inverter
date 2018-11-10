@@ -11,7 +11,10 @@ brew install libmodbus
 ```
 
 # Compile code with...
+
+```
 g++ `pkg-config --cflags --libs libmodbus` suresine.c -o suresine && chmod +x suresine
+```
 
 # Run
 `./suresign`
