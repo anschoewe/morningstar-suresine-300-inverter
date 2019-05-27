@@ -13,7 +13,7 @@ brew install libmodbus
 # Compile code with...
 
 ```
-g++ `pkg-config --cflags --libs libmodbus` suresine.c -o suresine && chmod +x suresine
+g++ `pkg-config --cflags --libs libmodbus` suresine.cpp -o suresine && chmod +x suresine
 ```
 
 # Run
