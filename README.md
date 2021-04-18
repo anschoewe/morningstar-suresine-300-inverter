@@ -29,6 +29,7 @@ The light will turn red on the inverter signaling the configuration changed.
 
 # Helpful Links
 - Morningstar official documentation for changing LVD and LVR: http://support.morningstarcorp.com/wp-content/uploads/2014/07/SI.APP_.LVD-Adjustment.02.EN_.pdf
+- Morningstar official documentation for the register settings: http://support.morningstarcorp.com/wp-content/uploads/2014/07/SI300.APP_.Modbus.EN_.03.pdf:q
 - libmodbus documentation: http://libmodbus.org/docs/v3.1.4/modbus_write_register.html
 - Example blog showing example of how to connect to MorningStar SureSine using libmodbus on Mac/Linux: https://westyd1982.wordpress.com/2010/03/26/linux-and-mac-os-x-software-to-read-data-from-the-sunsaver-mppt-using-modbus/
 
